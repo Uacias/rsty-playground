@@ -1,11 +1,10 @@
 use axum::{
-    http::{Error, StatusCode},
+    http::StatusCode,
     routing::{get, post},
     Json, Router,
 };
-use serde::Deserialize;
-use surrealdb::{engine::remote::ws::Ws, opt::auth::Root};
 use surrealdb::Surreal;
+use surrealdb::{engine::remote::ws::Ws, opt::auth::Root};
 mod models;
 use models::{CreateUser, User};
 
@@ -26,9 +25,7 @@ async fn hello() -> &'static str {
     "Hello, World!"
 }
 
-async fn create_user(
-    Json(payload): Json<CreateUser>,
-) -> Result<(StatusCode), (StatusCode, String)> {
+async fn create_user(Json(payload): Json<CreateUser>) -> Result<StatusCode, (StatusCode, String)> {
     let db = Surreal::new::<Ws>("127.0.0.1:8000").await.map_err(|e| {
         (
             StatusCode::INTERNAL_SERVER_ERROR,
@@ -70,7 +67,7 @@ async fn create_user(
         })?;
     tracing::info!("Created user: {:?}", user);
 
-    Ok((StatusCode::CREATED))
+    Ok(StatusCode::CREATED)
 }
 
 async fn get_users() -> Result<Json<Vec<User>>, (StatusCode, String)> {
@@ -105,6 +102,6 @@ async fn get_users() -> Result<Json<Vec<User>>, (StatusCode, String)> {
             format!("Error getting users: {:?}", e),
         )
     })?;
-    tracing::info!("Got users: {:?}", users);   
+    tracing::info!("Got users: {:?}", users);
     Ok(Json(users))
 }
